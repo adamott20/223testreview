@@ -29,9 +29,19 @@
 # and upper bounds of a 95% confidence interval of the probability.
 # 20 pts.
 
-mcnemar <- function(prob.1,prob.2,n,nReps=10000) {#Keep
-  # Your code goes here.#Keep
-
+mcnemar <- function(prob.1,prob.2,n,nReps=10000) {
+  rejects <- numeric(nReps)
+  for (i in 1:nReps){
+    doctor1 <- sample(c(0,1),n,prob=c(1-prob.1, prob.1), replace=TRUE)
+    doctor2 <- sample(c(0,1),n,prob=c(1-prob.2, prob.2), replace = TRUE)
+    b <- sum( doctor1 == 1 & doctor2 == 0)
+    c <- sum( doctor1 == 0 & doctor2 == 1)
+    test.stat <- (b-c)^2/(b+c)
+    rejects[i] <- test.stat >= qchisq(1-0.05,df=1)
+  }
+  prop <- mean(rejects)
+  ci <- prop + c(-1,1)*qnorm(0.975)*sqrt(prop*(1-prop)/nReps)
+  c(Estimate=prop, Lower=ci[1], Upper=ci[2])
   
 }#Keep
 
@@ -40,14 +50,14 @@ mcnemar <- function(prob.1,prob.2,n,nReps=10000) {#Keep
 # 0.3 and the sample size is 30.
 # 3 pts.
 
-
+mcnemar(0.3,0.3,30)
 
 # Using your function, see if the probability of rejecting the null hypothesis
 # is indeed 0.05 when both doctors diagnose a patient as sick with probability
 # 0.3 and the sample size is 60.
 # 3 pts.
 
-
+mcnemar(0.3,0.3,60)
 
 # For sample size being 60, 120, and 180, use your function to compute the
 # power when Doctor 1 diagnoses a patient as sick with probability 0.3 and
